@@ -39,6 +39,7 @@ Command line is not supported (yet).
 ## Organisation
 
 ### Input data
+Input data are saved in a specific folder, under "input_data/input_subxxxx/"
 
 All input data, which normally are updated each year, are in the form of Excel files. This is not usual but based on the fact that Excel is widely used in public administrations.
 Each row in the input excel files corresponds to a source category. A source category is uniquely defined by the following attributes (which are saved in specific column in the Excel files):
@@ -73,6 +74,13 @@ These data should be already valid for any simulation and cover:
 
 
 ### Output data
+Output data are saved in a specific folder, under "output_data/output_subxxxx/"
 
+#### Computed uncertainty values
 Output data to be further used and copied/pasted in reports are written automatically in Excel.
-Output data to be used for quality control are written as text files.
+
+#### Plots
+All plots automatically produced with the matplotlib package are saved as PNG figures.
+
+#### Automated quality control
+Output data to be used for quality control are written in a text file.

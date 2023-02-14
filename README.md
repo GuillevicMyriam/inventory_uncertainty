@@ -41,10 +41,10 @@ Command line is not supported (yet).
 ### Input data
 
 All input data, which normally are updated each year, are in the form of Excel files. This is not usual but based on the fact that Excel is widely used in public administrations.
-Each row in the input excel files corresponds to a source category. A source category is uniquely defined by the following attributes:
+Each row in the input excel files corresponds to a source category. A source category is uniquely defined by the following attributes (which are saved in specific column in the Excel files):
 - nomenclature class, such as CRT for greenhouse gases according to the IPCC Guidelines, or NFR for pollutants according to the EMEP Guidebook;
 - source category code according to the chosen nomenclature;
-- source category name according to the chosen nomenclature;
+- source category name according to the chosen nomenclature (unsupported so far, please leave blank);
 - compound name;
 - resource name, this is used in particular to specify the fuel burned for the Energy sector.
 
@@ -59,7 +59,18 @@ You can check the input Excel file for emissions to see how the structure should
 
 #### Input uncertainty data
 
-he input uncertainties must be given at the same aggregation level as for the emissions. 
+The input uncertainties must be given at the same aggregation level as for the emissions. For each source category, the following information must be provided for activity data and emission factor or, if unknown, for emissions:
+- distribution type: normal, gamma, triangular, uniform;
+- for normal and gamma distributions: standard deviation with a coverage factor of 2;
+- for the triangular distribution: lower edge and upper edge expressed in percentage of the mean (not the values at 2.5% and 97.5% of the distribution);
+- for the other distributions: lower end and upper end uncertainties at 2.5% and 97.5% of the distribution, expressed in percentage of the mean.
+- the information if values are correlated between the base year and the reporting year.
+
+#### Input nomenclature data
+These data should be already valid for any simulation and cover:
+- nomenclature definition for process names, compound names, resource names;
+- for each attribute (process, compound, resource), an aggregation tree.
+
 
 ### Output data
 

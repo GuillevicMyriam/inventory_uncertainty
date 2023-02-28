@@ -1,4 +1,4 @@
-# inventory_uncertainty
+# inventory_uncertainty_UNFCCC_CLRTAP
 This repository contains a method in Python to compute the uncertainty of an inventory (such as a pollutant inventory or a greenhouse gas inventory), based on input uncertainty for specific sub-categories of this inventory. The main aim of this Python script is to automatise computation tasks that have to performed every year for emission reporting in the framework of:
 - the UNECE Convention on Long-range Transboundary Air Pollution (CLRTAP);
 - the United Nations Framework Convention on Climate Change (UNFCCC).
@@ -39,6 +39,9 @@ Command line is not supported (yet).
 ## Organisation
 
 ### Input data
+
+"xxxx" = submission year, format YYYY
+
 Input data are saved in a specific folder, under "input_data/input_subxxxx/"
 
 All input data, which normally are updated each year, are in the form of Excel files. This is not usual but based on the fact that Excel is widely used in public administrations.
@@ -47,14 +50,14 @@ Each row in the input excel files corresponds to a source category. A source cat
 - source category code according to the chosen nomenclature;
 - source category name according to the chosen nomenclature (unsupported so far, please leave blank);
 - compound name;
-- resource name, this is used in particular to specify the fuel burned for the Energy sector.
+- resource name, this is used in particular in the Energy sector, to specify which fuel is burned.
 
 #### Input emission data
 
 The sum of all input emission data must match the inventory total.
 Do not include emissions that should not be included in the inventory total. In particular, do not include:
 - sources of natural origin, such as NMVOC emissions from forests or greenhouse gas emissions from wild animals;
-- source categories that, according to the official guidelines, should not be included in the inventory total.
+- source categories that, according to the official guidelines, should not be included in the inventory total (such as memo items).
 
 You can check the input Excel file for emissions to see how the structure should be. The column structure cannot be modified but the number of rows can be modified as required.
 

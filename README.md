@@ -41,6 +41,20 @@ In these scripts, the input parameters to set manually are:
 - `plot_mode`: a boolean variable, set to True to automatically plot some figures.
 - `make_new_output_folder`: a boolean variable, set to True to create a new, unique folder name to save the results.
 
+The scripts call the main function `routine_u_kca_wrapper`.
+
+### Main function
+The main function is `routine_u_kca_wrapper` and is stored in [`routine_u_kca.py`](./routine_u_kca.py).
+
+### Utility files
+All other functions are stored in files whose name starts with `utils_`:
+- [`utils_compute.py`](./utils_compute.py): functions to perform computation, including the Monte Carlo simulations and uncertainty propagation, using the packages `numpy` and `random`.
+- [`utils_constant.py`](./utils_constant.py): constant values and strings used for all other functions.
+- [`utils_io_file_structure.py`](./utils_io_file_structure.py): structure description of all input Excel files, to be used by the `pandas` package.
+- [`utils_io_read_check.py`](./utils_io_read_check.py): fonctions mostly using the `pandas` package to read input Excel files and also perform quality checks.
+- [`utils_io_write_to_excel.py`](./utils_io_write_to_excel.py): fonctions to write output results to Excel files, using the package `openpyxl`.
+- [`utils_plot.py`](./utils_plot.py): function to plot results, using the `matplotlib` package.
+
 
 ### Run from the command line
 Command line is not supported (yet).

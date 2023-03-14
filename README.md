@@ -16,14 +16,15 @@ https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf/325dcaad-c15a-4
 ## Installation
 
 The script has been tested with the Anaconda3 environment, version 4.4.0, using Python version 3.6.1. We recommend to install Anaconda3 or to make sure the following packages are installed:
-- `numpy`
-- `pandas`
-- `openpyxl`
-- `numbers`
-- `random`
-- `pathlib`
+- `datetime`
 - `matplotlib`
-
+- `numbers`
+- `numpy`
+- `openpyxl`
+- `pandas`
+- `pathlib`
+- `random`
+- `scipy`
 
 ### Download the source from git
 

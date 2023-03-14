@@ -94,7 +94,7 @@ These data should be already valid for any simulation using only official NFR or
 
 ### Output data
 Output data are saved in a specific folder, under "/output_data/output_subxxxx/output_subxxx_IIR" for pollutants and under "/output_data/output_subxxxx/output_subxxx_NID" for greenhouse gases.
-For submission 2023, the output files are saved at: [`/output_data/output_sub2023/output_sub2023/output_sub2023_IIR/`](./output_data/output_sub2023/output_sub2023/output_sub2023_IIR/) for pollutants and [`/output_data/output_sub2023/output_sub2023/output_sub2023_NID/`](./output_data/output_sub2023/output_sub2023/output_sub2023_NID/) for greenhouse gases.
+For submission 2023, the output files are saved at: [`/output_data/output_sub2023/output_sub2023_IIR/`](./output_data/output_sub2023/output_sub2023_IIR/) for pollutants and [`/output_data/output_sub2023/output_sub2023_NID/`](./output_data/output_sub2023/output_sub2023_NID/) for greenhouse gases.
 
 #### Computed uncertainty values
 Output data are automatically exported to Excel. These Excel files can be further used and copied/pasted in reports. 

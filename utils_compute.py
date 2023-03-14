@@ -19,6 +19,7 @@ Created on Wed Sep 29 12:04:04 2021
 """
 
 import numpy as np
+#from nptyping import NDArray, Float64 #necessary for python hint type but not available with the Anaconda3 distribution v 4.4.0
 import pandas as pd
 import random
 import utils_constant as const
@@ -28,8 +29,8 @@ from scipy.stats import gamma, triang #,norm,  , lognorm
 
 
 def compute_U_propagation_em_pd(
-        df
-        ):
+        df: pd.DataFrame
+        ) -> pd.DataFrame:
     """Compute uncertainty propagation (IPCC guidebook: approach 1)
     
     Compute the uncertainty propagation as described in the IPCC guidebook on uncertainty.
@@ -147,8 +148,8 @@ def compute_U_propagation_em_pd(
                     #print("{} {} {}".format(input_year, input_type, df[u_is_num].iloc[i], df[em].iloc[i] != np.float64(0.0)))
                 
                     if df[u_dist].iloc[i] == const.DIST_NORMAL:
-                        df_u[_pr_U_lower_p].iloc[i] = df[u_lower_f].iloc[i]*float(200.0)
-                        df_u[_pr_U_upper_p].iloc[i] = df[u_upper_f].iloc[i]*float(200.0)
+                        df_u[_pr_U_lower_p].iloc[i] = df[u_lower_f].iloc[i]*float(100.0)*const.FACTOR_U_DIST_95_PERCENT
+                        df_u[_pr_U_upper_p].iloc[i] = df[u_upper_f].iloc[i]*float(100.0)*const.FACTOR_U_DIST_95_PERCENT
 
                     elif df[u_dist].iloc[i] == const.DIST_GAMMA:
                         #implicitely, value is one because input U is in percent
@@ -156,7 +157,7 @@ def compute_U_propagation_em_pd(
                         variance = (df[u_upper_f].iloc[i])**2
                         beta = variance #/1 #mean is one
                         alpha = float(1.0) / beta 
-                        df_u[_pr_U_lower_p].iloc[i] = (float(1.0) - gamma.ppf(const.DIST_PPF_EDGE_LOWER, alpha, loc = 0, scale =beta))*float(100.0) #2 sigma 
+                        df_u[_pr_U_lower_p].iloc[i] = (float(1.0) - gamma.ppf(const.DIST_PPF_EDGE_LOWER, alpha, loc = 0, scale =beta))*float(100.0)
                         df_u[_pr_U_upper_p].iloc[i] = (gamma.ppf(const.DIST_PPF_EDGE_UPPER, alpha, loc = 0, scale =beta) - float(1.0))*float(100.0)
                                 
                     elif df[u_dist].iloc[i] == const.DIST_TRIANGULAR:
@@ -173,10 +174,10 @@ def compute_U_propagation_em_pd(
                         df_u[_pr_U_lower_p].iloc[i] = (float(1.0) - triang.ppf(q = const.DIST_PPF_EDGE_LOWER, c = triangle_c, loc = triangle_min, scale = triangle_scale)) * float(100.0)
                         df_u[_pr_U_upper_p].iloc[i] = (triang.ppf(q = const.DIST_PPF_EDGE_UPPER, c = triangle_c, loc = triangle_min, scale = triangle_scale) - float(1.0)) * float(100.0)
         
-                    #TODO GMY 20230228 add lognormal distribution
+                    #TODO  20230228 add lognormal distribution
         
         for i in range(len(df)):
-            #TODO GMY 20230215 check if this is the right condition
+            #TODO  20230215 check if this is the right condition
             if df[u_AD_is_num].iloc[i] and df[u_EF_is_num].iloc[i] and df[em].iloc[i] != np.float64(0.0):
                 df_u[EM_pr_U_lower_p].iloc[i] = np.sqrt(np.square(df_u[AD_pr_U_lower_p].iloc[i]) + np.square(df_u[EF_pr_U_lower_p].iloc[i]))
                 df_u[EM_pr_U_upper_p].iloc[i] = np.sqrt(np.square(df_u[AD_pr_U_upper_p].iloc[i]) + np.square(df_u[EF_pr_U_upper_p].iloc[i]))
@@ -191,11 +192,11 @@ def compute_U_propagation_em_pd(
 
 
 def compute_U_propagation_trend_pd(
-        df,
-        df_u,
-        EM_BY_sum,
-        EM_RY_sum,
-        ):
+        df: pd.DataFrame,
+        df_u: pd.DataFrame,
+        EM_BY_sum: float,
+        EM_RY_sum: float,
+        ) -> pd.DataFrame:
     """Compute uncertainty for the trend according to uncertainty propagation.
     
     Do this after aggregation has been performed.
@@ -203,9 +204,7 @@ def compute_U_propagation_trend_pd(
     
     """
 
-
-
-    df_u["sens_corr"] = np.float(0.0) #sensitivity if correlation between base year and reporting year
+    df_u["sens_corr"] = np.float(0.0) #sensitivity if full correlation between base year and reporting year
     df_u["sens_no_corr"] = np.float(0.0) #sensitivity if no correlation between base year and reporting year
     df_u["AD_trend_normed_pr_contrib_var_lower"] = np.float(0.0)
     df_u["AD_trend_normed_pr_contrib_var_upper"] = np.float(0.0)
@@ -213,63 +212,64 @@ def compute_U_propagation_trend_pd(
     df_u["EF_trend_normed_pr_contrib_var_upper"] = np.float(0.0)
     df_u["EM_trend_normed_pr_contrib_var_lower"] = np.float(0.0)
     df_u["EM_trend_normed_pr_contrib_var_upper"] = np.float(0.0)
-
-    
-    #indexes = [i for i in range(len(df_u)) if df_u['is_num'][i]]
+   
     indexes = df.index[df['EM_is_num_BY'] | df['EM_is_num_RY']].tolist()
 
+    #IPCC/EMEP type A sensitivity: base year and reporting year are fully correlated
     df_u['sens_corr'][indexes] = np.abs((0.01* df['EM_RY'][indexes] + EM_RY_sum - (0.01* df['EM_BY'][indexes] + EM_BY_sum)) / (0.01* df['EM_BY'][indexes] + EM_BY_sum) *float(100) - (EM_RY_sum - EM_BY_sum)/ EM_BY_sum* float(100.0))
-    df_u['sens_no_corr'][indexes] = np.abs(df['EM_RY'][indexes]/EM_BY_sum) #IPCC: type B sensitivity
-
-    #i_is_num_AD_EF = 
-    #i_is_num_dEM = 
-    
+    #IPCC/EMEP type B sensitivity: base year and reporting year are not correlated
+    df_u['sens_no_corr'][indexes] = np.abs(df['EM_RY'][indexes]/EM_BY_sum) 
+   
     for i in indexes:
         if df['EM_is_num_RY'][i]:
             if df["import"][i] and not df['uEM_is_num_BY'][i] and not df['uEM_is_num_RY'][i]:
                 #Inputs given, and for AD and EF
                 if df['uAD_corr'][i]:
-                    df_u['AD_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_corr'][i] * df_u['AD_RY_pr_U_lower_p'][i] #df_u['uAD_RY_lower_f'][i]* float(200.0)
-                    df_u['AD_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_corr'][i] * df_u['AD_RY_pr_U_upper_p'][i] #df_u['uAD_RY_upper_f'][i]* float(200.0)
+                    df_u['AD_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_corr'][i] * df_u['AD_RY_pr_U_lower_p'][i]
+                    df_u['AD_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_corr'][i] * df_u['AD_RY_pr_U_upper_p'][i]
                 else:
-                    df_u['AD_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['AD_RY_pr_U_lower_p'][i] #df_u['uAD_RY_lower_f'][i]* float(200.0)
-                    df_u['AD_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['AD_RY_pr_U_upper_p'][i] #df_u['uAD_RY_upper_f'][i]* float(200.0)
+                    df_u['AD_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['AD_RY_pr_U_lower_p'][i]
+                    df_u['AD_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['AD_RY_pr_U_upper_p'][i]
                     
                 if df['uEF_corr'][i]:
-                    df_u['EF_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_corr'][i] * df_u['EF_RY_pr_U_lower_p'][i] #df_u['uEF_RY_lower_f'][i]* float(200.0)
-                    df_u['EF_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_corr'][i] * df_u['EF_RY_pr_U_upper_p'][i] #df_u['uEF_RY_upper_f'][i]* float(200.0)
+                    df_u['EF_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_corr'][i] * df_u['EF_RY_pr_U_lower_p'][i]
+                    df_u['EF_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_corr'][i] * df_u['EF_RY_pr_U_upper_p'][i]
                 else:
-                    df_u['EF_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EF_RY_pr_U_lower_p'][i] #df_u['uEF_RY_lower_f'][i]* float(200.0)
-                    df_u['EF_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EF_RY_pr_U_upper_p'][i] #df_u['uEF_RY_upper_f'][i]* float(200.0)
+                    df_u['EF_trend_normed_pr_contrib_var_lower'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EF_RY_pr_U_lower_p'][i]
+                    df_u['EF_trend_normed_pr_contrib_var_upper'][i] = df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EF_RY_pr_U_upper_p'][i]
     
                 df_u['EM_trend_normed_pr_contrib_var_lower'][i] = np.square(df_u['EF_trend_normed_pr_contrib_var_lower'][i]) + np.square(df_u['AD_trend_normed_pr_contrib_var_lower'][i])
                 df_u['EM_trend_normed_pr_contrib_var_upper'][i] = np.square(df_u['EF_trend_normed_pr_contrib_var_upper'][i]) + np.square(df_u['AD_trend_normed_pr_contrib_var_upper'][i])
-    
-    
+        
             else:
                 #This is a direct emission
                 if df['uEM_corr'][i]:
-                    df_u['EM_trend_normed_pr_contrib_var_lower'][i] = np.square(df_u['sens_corr'][i] * df_u['EM_RY_pr_U_lower_p'][i]) #df_u['udEM_RY_lower_f'][i]* float(200.0))
-                    df_u['EM_trend_normed_pr_contrib_var_upper'][i] = np.square(df_u['sens_corr'][i] * df_u['EM_RY_pr_U_upper_p'][i]) #df_u['udEM_RY_upper_f'][i]* float(200.0))
+                    df_u['EM_trend_normed_pr_contrib_var_lower'][i] = np.square(df_u['sens_corr'][i] * df_u['EM_RY_pr_U_lower_p'][i])
+                    df_u['EM_trend_normed_pr_contrib_var_upper'][i] = np.square(df_u['sens_corr'][i] * df_u['EM_RY_pr_U_upper_p'][i])
                 else:
-                    df_u['EM_trend_normed_pr_contrib_var_lower'][i] = np.square(df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EM_RY_pr_U_lower_p'][i]) #df_u['udEM_RY_lower_f'][i]* float(200.0))
-                    df_u['EM_trend_normed_pr_contrib_var_upper'][i] = np.square(df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EM_RY_pr_U_upper_p'][i]) #df_u['udEM_RY_upper_f'][i]* float(200.0))
-
+                    df_u['EM_trend_normed_pr_contrib_var_lower'][i] = np.square(df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EM_RY_pr_U_lower_p'][i])
+                    df_u['EM_trend_normed_pr_contrib_var_upper'][i] = np.square(df_u['sens_no_corr'][i] * np.sqrt(2.0) * df_u['EM_RY_pr_U_upper_p'][i])
 
     return df_u
 
 
 def compute_U_propagation_normalisation_pd(
-        df_pr_out, 
-        y_string,
-        index_total,
-        ):
+        df_pr_out: pd.DataFrame, 
+        y_string: str,
+        index_total: int,
+        ) -> pd.DataFrame:
     
     """Normalise variance contribution by emission of the same row
     
     For emissions: the aggregated variance must be normalised by the aggregated emission,
     and then the square root must be computed.
-    For the trend: the square root must be computed
+    For the trend: the square root must be computed.
+    
+    Args:
+        df_pr_out: pd.DataFrame, contains all input data
+        y_string: string for the year, BY, RY or trend_normed.
+        index_total: int, index of the row containing the inventory total.
+        
     
     """
     
@@ -289,14 +289,13 @@ def compute_U_propagation_normalisation_pd(
             df_pr_out["EM_{}_pr_contrib_var_normed_lower".format(y_string)] = np.float(0.0)
             df_pr_out["EM_{}_pr_contrib_var_normed_upper".format(y_string)] = np.float(0.0)
     
-    
-    
+        
     elif y_string == "trend_normed":
         #factor_variance_norm = np.float(1.0)
         df_pr_out["EM_{}_pr_U_lower_p".format(y_string)] = np.sqrt(df_pr_out["EM_{}_pr_contrib_var_lower".format(y_string)])
         df_pr_out["EM_{}_pr_U_upper_p".format(y_string)] = np.sqrt(df_pr_out["EM_{}_pr_contrib_var_upper".format(y_string)])
     
-
+    #Compute the mean variance and mean uncertainty: do not forget to divide by 2!
     df_pr_out["EM_{}_pr_contrib_var_mean".format(y_string)] = (df_pr_out["EM_{}_pr_contrib_var_lower".format(y_string)] + df_pr_out["EM_{}_pr_contrib_var_upper".format(y_string)])/float(2.0)
     df_pr_out["EM_{}_pr_U_mean_p".format(y_string)] = (df_pr_out["EM_{}_pr_U_lower_p".format(y_string)] + df_pr_out["EM_{}_pr_U_upper_p".format(y_string)])/float(2.0)
 
@@ -305,7 +304,13 @@ def compute_U_propagation_normalisation_pd(
 
 
 
-def generate_random_value(dist, mean, u_left, u_right, no_random):
+def generate_random_value(
+        dist: int, 
+        mean: float, 
+        u_left: float, 
+        u_right: float, 
+        no_random: int,
+        ) -> list:
     #XXX generate random values using package random
     """
     This function contains the generation of one or several random number(s)
@@ -412,7 +417,7 @@ def generate_random_value(dist, mean, u_left, u_right, no_random):
         """            
         #special case following email exchange with Daniel Bretscher 13.01.2022
         #the uncetainty refers to the mode, not the mean, he wrote
-        #(GMY note: The IPCC guidelines are not clear at all about this)
+        #( note: The IPCC guidelines are not clear at all about this)
         #but until now for approach 1 is was assumed, implicitely, 
         #that uncertainty was given as percentage of the mean.
         #input u_left and u_right are one sigma only
@@ -475,10 +480,16 @@ def generate_random_value(dist, mean, u_left, u_right, no_random):
     
     return val
 
-def generate_random_value_np(dist, mean, u_left, u_right, no_random):
+def generate_random_value_np(
+        dist: int, 
+        mean: float, 
+        u_left: float, 
+        u_right: float, 
+        no_random: int,
+        ):
     #TODO work in progress: generate random values using the numpy package.
     """
-    GMY 2022.03.16
+     2022.03.16
     WORK IN PROGRESS
     FOR TEST PURPOSE: DO THE SAME AS generate_random_value 
     BUT USING NUMPY FUNCTIONS.
@@ -659,7 +670,7 @@ def generate_random_value_np(dist, mean, u_left, u_right, no_random):
     return val
 
 
-#def dist_triangular_pdf
+
 
 def find_interval(x, p):
     #XXX find interval from a list
@@ -748,7 +759,7 @@ def find_interval_np(x, p):
         U_lower = mean - edge_min (equiv. to 2 sigmas)
     """
     
-    #TODO GMY 20230216
+    #TODO  20230216
     #use partition to speed up sorting
     #use partition estimate values from uncertainty propagation
     #https://numpy.org/doc/stable/reference/generated/numpy.ndarray.partition.html#numpy.ndarray.partition
@@ -791,7 +802,7 @@ def find_interval_np(x, p):
 
     return edge_min, edge_max  
 
-def find_interval_pd(x, p):
+def find_interval_pd(x: pd.Series, p: float):
     #XXX find interval from a pandas DataFrame
     """
     Find the smallest interval of values from x that represents the fraction
@@ -812,7 +823,7 @@ def find_interval_pd(x, p):
         U_lower = mean - edge_min (equiv. to 2 sigmas)
     """
 
-    #TODO GMY 20230216
+    #TODO  20230216
     #use partition to speed up sorting
     #use partition estimate values from uncertainty propagation
     #https://numpy.org/doc/stable/reference/generated/numpy.ndarray.partition.html#numpy.ndarray.partition
@@ -882,7 +893,7 @@ def find_interval_np_zeronan(y, no_mc, no_interv):
         U_lower = mean - edge_min (equiv. to 2 sigmas)
     """
 
-    #TODO GMY 20230203 use np.partition to put values in 3 groups,
+    #TODO  20230203 use np.partition to put values in 3 groups,
     #and sort only first group and last group.
     #https://numpy.org/doc/stable/reference/generated/numpy.partition.html#numpy.partition
     #numpy.partition(a, kth, axis=-1, kind='introselect', order=None)
@@ -978,15 +989,33 @@ def find_interval_centered(x, p):
 
 
 def groupby_one_attribute_pd(
-        df,
-        df_agg_tree,
-        use_cols_for_agg,
-        agg_str,
-        child_id_left,
-        col_unique_groupby_extra,
-        col_EM_status,
-        ):
+        df: pd.DataFrame,
+        df_agg_tree: pd.DataFrame,
+        agg_str: str,
+        child_id_left: str,
+        col_unique_groupby_extra: list,
+        col_EM_status: str,
+        ) -> pd.DataFrame:
+    """Perform aggregation of source categories
+    
+    The aggregation is performed according to one attribute only
+    and using the aggregation tree for this attribute provided as input.
+    The aggregation is done using a sum.
 
+    Args:
+        df: pd.DataFrame, input containing columns with child-parent information
+            for the aggregation as well as columns with numeric values to sum up.
+        df_agg_tree: pd.DataFrame, input aggregation tree for one attribute.
+            One column is the child and one column is the parent.
+        agg_str: str,
+        child_id_left: str,
+        col_unique_groupby_extra: list, length is 2.
+        col_EM_status: str,
+
+    Returns:
+        df: concatenation of rows of input df together with rows obtained by aggregation.        
+    
+    """
 
 
     depth_id = "depth_id{}".format(agg_str)
@@ -1012,21 +1041,18 @@ def groupby_one_attribute_pd(
     df[parent_id] = df_test[parent_id].copy()        
 
     agg_max_depth = np.int(np.max(df[depth_id]))
+    print("group by: " + str([parent_id] + col_unique_groupby_extra + [depth_id]))
         
     for i_depth in range(agg_max_depth, 0, -1):
         #aggregate only to one level above
         print("i_depth: " + str(i_depth))
         
-        print("group by: " + str([parent_id] + col_unique_groupby_extra + [depth_id]))
-
         df_agg_mc = df.loc[df[depth_id] == i_depth].groupby(
                 by = [parent_id] + col_unique_groupby_extra + [depth_id]).sum().reset_index()
 
         
-        #TODO GMY 20230216 The next loop is very slow. 
-        #Find a better way using .agg
+        #TODO 20230216 The next loop is very slow. 
         df_agg_mc[col_EM_status] = "ES"
-        #df_agg_mc["EM_is_num_BY"] = True
         for i in range(len(df_agg_mc)):
             status_list = pd.unique(df[col_EM_status].loc[
                     (df[col_unique_groupby_extra[0]] == df_agg_mc[col_unique_groupby_extra[0]].iloc[i])
@@ -1039,7 +1065,6 @@ def groupby_one_attribute_pd(
         #Update depth_id of resulting rows: one level up.
         df_agg_mc[depth_id] -= 1
         df_agg_mc[child_id_left] = df_agg_mc[parent_id].copy()
-        #df_agg_mc["import"] = False
                     
         df_agg_mc = pd.merge(
                 df_agg_mc, 
@@ -1060,7 +1085,7 @@ def groupby_one_attribute_pd(
         
         
         #Concatenate the aggregated rows with the original DataFrame, to get all results into one DataFrame
-        #TODO GMY 20230217: think abut a less memory-intensive method.
+        #TODO 20230217: think about a less memory-intensive method.
         #The problem is, such intermediate results are needed for subsequent aggregations.
         df = pd.concat([df, df_agg_mc], axis =0, ignore_index=True)
 

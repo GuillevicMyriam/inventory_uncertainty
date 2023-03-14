@@ -24,23 +24,16 @@ from pathlib import Path
 import random
 
 
-def make_new_folder(output_folder_name_start: str):
+def make_new_folder(
+        output_folder_name_start: str
+        ) -> str:
     
     """Make a new folder name for outputs.
     
     Args:
-        output_folder_name: start of output folder name.
+        output_folder_name: start string for the output folder name.
     """
     
-    """
-    if routine == const.ROUTINE_IIR or routine == const.ROUTINE_IIR_WITHOUT_U:
-        routine_text = "_IIR/"
-    elif routine == const.ROUTINE_NID:
-        routine_text = "_NID/"
-
-    output_folder_name = root_path + "output_data/output_sub" + SY_string + "/" + "output_sub" + SY_string + routine_text
-    """
-
     #generate random, unique folder name    
     allowed_chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"    
     date = datetime.datetime.now()
@@ -48,7 +41,7 @@ def make_new_folder(output_folder_name_start: str):
     
     unique = False
     while unique is False:
-        unique_out_folder_name = output_folder_name_start + "{0:%Y%m%d_%Hh%M}".format(date) + "_" + random_string + "/"
+        unique_out_folder_name = output_folder_name_start + "{0:%Y%m%d_%Hh%M}".format(date) + "_" + random_string + "\\"
         
         if not Path(unique_out_folder_name).is_dir():
             unique = True
@@ -60,7 +53,10 @@ def make_new_folder(output_folder_name_start: str):
 
 #XXX Define file structure to read input nomenclature definition
 
-def io_nomenc(root_path, SY_string):
+def io_nomenc(
+        root_path, 
+        SY_string: str
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the nomenclature and put all variable in a dictionary.
     
@@ -85,7 +81,7 @@ def io_nomenc(root_path, SY_string):
     # FOR PROCESS, COMPOUND AND RESOURCE
     #===========================================================================
     
-    in_nomenc_foldername = root_path + "input_data/input_sub" + SY_string + "/input_nomenclature/"
+    in_nomenc_foldername = root_path + "\\input_data\\input_sub" + SY_string + "\\input_nomenclature\\"
     in_nomenc_filename = "nomenclature_sub{}.xlsx".format(SY_string)
     in_nomenc_pathname = in_nomenc_foldername + in_nomenc_filename
         
@@ -100,7 +96,7 @@ def io_nomenc(root_path, SY_string):
     
     
     #===========================================================================
-    # DEFINE STRUCTURE OF INPUT FILE FOR CATEGORY/PROCESS NOMENCLATURE
+    # DEFINE STRUCTURE OF INPUT FILE FOR SOURCE CATEGORY NOMENCLATURE
     #===========================================================================
     
     in_header_proc = 0
@@ -231,14 +227,33 @@ def io_nomenc(root_path, SY_string):
 
 #XXX Below: define file structure to read nomenclature to use for reporting, define output file names
 
-def io_out_inventory_crt(root_path, SY_string, make_new_output_folder):
+def io_out_inventory_crt(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        make_new_output_folder: bool,
+        ) -> dict:
     """Define file names for output files.
+
+    The obtained dictionary is valid for greenhouse gases, for the whole inventory.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the output excel file structure should change.
+
+    Args:
+        root_path: path frm root where to look for files.
+        SY_string: string for the submission year, format YYYY.
+        make_new_output_folder: boolean type, set to True to create a unique, 
+            specific folder name where to store all output files.
+
+    Returns:
+        dict_io_out: dictionary containing all needed information
+            about the file structure to write the output data.
     """
 
     dict_io_out = {}
     dict_io_out["out_name_script"] = "inventory"
 
-    dict_io_out["output_foldername"] = root_path + "output_data/output_sub" + SY_string + "/" + "output_sub" + SY_string + "_NID/"
+    dict_io_out["output_foldername"] = root_path + "\\output_data\\output_sub" + SY_string + "\\" + "output_sub" + SY_string + "_NID\\"
     if make_new_output_folder:
         folder_name_start = dict_io_out["output_foldername"] + "NID_sub{}_{}_".format(SY_string, dict_io_out["out_name_script"])
         dict_io_out["output_foldername"] = make_new_folder(folder_name_start)
@@ -258,7 +273,7 @@ def io_out_inventory_crt(root_path, SY_string, make_new_output_folder):
     dict_io_out["out_nomenc_filename"] = "Uncertainties_Overview_NID_IIR_Sub{}.xlsx".format(SY_string)
     dict_io_out["out_nomenc_sheetname"] = "NID_output_CRT_codes"
     
-    dict_io_out["out_nomenc_foldername"]  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    dict_io_out["out_nomenc_foldername"]  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     dict_io_out["out_nomenc_pathname"] = dict_io_out["out_nomenc_foldername"] + dict_io_out["out_nomenc_filename"]
         
     dict_io_out["header_out_nomenc"] = None
@@ -282,7 +297,12 @@ def io_out_inventory_crt(root_path, SY_string, make_new_output_folder):
     return dict_io_out
 
 
-def io_out_indirect(root_path, SY_string, make_new_output_folder):
+def io_out_indirect(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        make_new_output_folder: bool,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) for output files and put all variables in a dictionary.
     
@@ -293,6 +313,8 @@ def io_out_indirect(root_path, SY_string, make_new_output_folder):
     Args:
         root_path: path frm root where to look for files.
         SY_string: string for the submission year, format YYYY.
+        make_new_output_folder: boolean type, set to True to create a unique, 
+            specific folder name where to store all output files.
         
     Returns:
         dict_io_out: dictionary containing all needed information
@@ -302,7 +324,7 @@ def io_out_indirect(root_path, SY_string, make_new_output_folder):
     dict_io_out = {}
     dict_io_out["out_name_script"] = "indirectEM"
     
-    dict_io_out["output_foldername"] = root_path + "output_data/output_sub" + SY_string + "/" + "output_sub" + SY_string + "_NID/"    
+    dict_io_out["output_foldername"] = root_path + "\\output_data\\output_sub" + SY_string + "\\" + "output_sub" + SY_string + "_NID\\"    
     if make_new_output_folder:
         folder_name_start = dict_io_out["output_foldername"] + "NID_sub{}_{}_".format(SY_string, dict_io_out["out_name_script"])
         dict_io_out["output_foldername"] = make_new_folder(folder_name_start)
@@ -322,7 +344,7 @@ def io_out_indirect(root_path, SY_string, make_new_output_folder):
     dict_io_out["out_nomenc_filename"] = "Uncertainties_Overview_NID_IIR_Sub{}.xlsx".format(SY_string)
     dict_io_out["out_nomenc_sheetname"] = "NID_output_CRT_codes"
     
-    dict_io_out["out_nomenc_foldername"]  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    dict_io_out["out_nomenc_foldername"]  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     dict_io_out["out_nomenc_pathname"] = dict_io_out["out_nomenc_foldername"] + dict_io_out["out_nomenc_filename"]
     
     
@@ -346,7 +368,12 @@ def io_out_indirect(root_path, SY_string, make_new_output_folder):
     return dict_io_out
 
 
-def io_out_lulucf(root_path, SY_string, make_new_output_folder):
+def io_out_lulucf(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        make_new_output_folder: bool,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) for output files and put all variables in a dictionary.
     
@@ -357,6 +384,8 @@ def io_out_lulucf(root_path, SY_string, make_new_output_folder):
     Args:
         root_path: path frm root where to look for files.
         SY_string: string for the submission year, format YYYY.
+        make_new_output_folder: boolean type, set to True to create a unique, 
+            specific folder name where to store all output files.
         
     Returns:
         dict_io_out: dictionary containing all needed information
@@ -366,7 +395,7 @@ def io_out_lulucf(root_path, SY_string, make_new_output_folder):
     dict_io_out = {}
     dict_io_out["out_name_script"] = "LULUCF"
 
-    dict_io_out["output_foldername"] = root_path + "output_data/output_sub" + SY_string + "/" + "output_sub" + SY_string + "_NID/"
+    dict_io_out["output_foldername"] = root_path + "\\output_data\\output_sub" + SY_string + "\\" + "output_sub" + SY_string + "_NID\\"
     if make_new_output_folder:
         folder_name_start = dict_io_out["output_foldername"] + "NID_sub{}_{}_".format(SY_string, dict_io_out["out_name_script"])
         dict_io_out["output_foldername"] = make_new_folder(folder_name_start)
@@ -386,7 +415,7 @@ def io_out_lulucf(root_path, SY_string, make_new_output_folder):
     dict_io_out["out_nomenc_filename"] = "Uncertainties_Overview_NID_IIR_Sub{}.xlsx".format(SY_string)
     dict_io_out["out_nomenc_sheetname"] = "NID_output_CRT_codes"
     
-    dict_io_out["out_nomenc_foldername"]  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    dict_io_out["out_nomenc_foldername"]  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     dict_io_out["out_nomenc_pathname"] = dict_io_out["out_nomenc_foldername"] + dict_io_out["out_nomenc_filename"]
     
     
@@ -412,42 +441,59 @@ def io_out_lulucf(root_path, SY_string, make_new_output_folder):
 
 
 
-def io_out_inventory_nfr(root_path, SY_string, make_new_output_folder):
+def io_out_inventory_nfr(
+        root_path: str, 
+        SY_string: str,
+        BY_string: str,
+        make_new_output_folder: bool,
+        ) -> dict:
     """Define file names for output files.
+
     Define file name for check file.
-    Read in nomenclature to use for source categories to report.
-    
+    Read in nomenclature to use for source categories to report.    
     Warning! Do not define final file names for output files,
     i.e. do not give an extension yet,
     because the final name requires compound name, and we don't have it yet.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the output excel file structure should change.
+
+    Args:
+        root_path: path frm root where to look for files.
+        SY_string: string for the submission year, format YYYY.
+        make_new_output_folder: boolean type, set to True to create a unique, 
+            specific folder name where to store all output files.
+        
+    Returns:
+        dict_io_out: dictionary containing all needed information
+            about the file structure to write the output data.
     """
 
     dict_io_out = {}
     dict_io_out["out_name_script"] = "inventory"
 
-    dict_io_out["output_foldername"] = root_path + "output_data/output_sub" + SY_string + "/" + "output_sub" + SY_string + "_IIR/"
+    dict_io_out["output_foldername"] = root_path + "\\output_data\\output_sub" + SY_string + "\\" + "output_sub" + SY_string + "_IIR\\"
     if make_new_output_folder:
         folder_name_start = dict_io_out["output_foldername"] + "IIR_sub{}_{}_".format(SY_string, dict_io_out["out_name_script"])
         dict_io_out["output_foldername"] = make_new_folder(folder_name_start)
 
     #Warning! Do not add the .xlsx extension here. This is aded later on.
-    dict_io_out["filename_out_KCA_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_KCA1_KCA2".format(SY_string, dict_io_out["out_name_script"])
-    dict_io_out["filename_out_u_input_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_uncertainties_input".format(SY_string, dict_io_out["out_name_script"])
-    dict_io_out["filename_out_u_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_uncertainties_app1_app2".format(SY_string, dict_io_out["out_name_script"])
-    dict_io_out["figname_out_mc_tornado_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_fig_mc_tornado".format(SY_string, dict_io_out["out_name_script"])
-    dict_io_out["figname_out_mc_distribution_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_fig_mc_distribution".format(SY_string, dict_io_out["out_name_script"])
+    dict_io_out["filename_out_KCA_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_KCA1_KCA2_".format(SY_string, dict_io_out["out_name_script"])
+    dict_io_out["filename_out_u_input_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_uncertainties_input_".format(SY_string, dict_io_out["out_name_script"])
+    dict_io_out["filename_out_u_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_uncertainties_app1_app2_".format(SY_string, dict_io_out["out_name_script"])
+    dict_io_out["figname_out_mc_tornado_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_fig_mc_tornado_".format(SY_string, dict_io_out["out_name_script"])
+    dict_io_out["figname_out_mc_distribution_root"] = dict_io_out["output_foldername"] + "IIR_sub{}_{}_fig_mc_distribution_".format(SY_string, dict_io_out["out_name_script"])
 
     #name of output check file
     dict_io_out["check_filename"] = "IIR_sub{}_{}_uncertainties_KCA_check_file.txt".format(SY_string, dict_io_out["out_name_script"])
     dict_io_out["check_filename"] = dict_io_out["output_foldername"] + dict_io_out["check_filename"]
 
     #For pollutants, the output nomenclature to use is exactly the NFR table, so just read in the NFR table
-    dict_io_em = io_em_inventory_nfr(root_path, SY_string)
+    dict_io_em = io_em_inventory_nfr(root_path, SY_string, BY_string)
         
-    dict_io_out["out_nomenc_filename"] = dict_io_em["in_EM_RY_filename"] #"Uncertainties_Overview_NID_IIR_Sub{}.xlsx".format(SY_string)
-    dict_io_out["out_nomenc_sheetname"] = dict_io_em["in_EM_RY_sheetname"] #"NID_output_CRT_codes"
+    dict_io_out["out_nomenc_filename"] = dict_io_em["in_EM_RY_filename"]
+    dict_io_out["out_nomenc_sheetname"] = dict_io_em["in_EM_RY_sheetname"] 
     
-    dict_io_out["out_nomenc_foldername"]  = dict_io_em["in_EM_RY_foldername"]#root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    dict_io_out["out_nomenc_foldername"]  = dict_io_em["in_EM_RY_foldername"]
     dict_io_out["out_nomenc_pathname"] = dict_io_out["out_nomenc_foldername"] + dict_io_out["out_nomenc_filename"]
         
     dict_io_out["header_out_nomenc"] = dict_io_em["in_header_EM_RY"] #None
@@ -463,9 +509,22 @@ def io_out_inventory_nfr(root_path, SY_string, make_new_output_folder):
 
 #XXX Below: define file structure to read input uncertainties
 
-def io_u_inventory_crt(root_path, SY_string, BY_string):
+def io_u_inventory_crt(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+    
+    This function is to be used specifically for greenhouse gases, for the whole inventory.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
     """
     
     RY_string = str(int(SY_string)-2)
@@ -481,9 +540,9 @@ def io_u_inventory_crt(root_path, SY_string, BY_string):
     in_U_RY_sheetname = "U_NID_{}_sub{}".format(RY_string, SY_string)
     in_U_BY_sheetname = "U_NID_{}_sub{}".format(BY_string, SY_string)
 
-    in_U_BY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_BY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_BY_pathname = in_U_BY_foldername + in_U_BY_filename
-    in_U_RY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_RY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_RY_pathname = in_U_RY_foldername + in_U_RY_filename
     
     in_header_u = None
@@ -554,9 +613,23 @@ def io_u_inventory_crt(root_path, SY_string, BY_string):
     return dict_io_u
 
 
-def io_u_indirect(root_path, SY_string, BY_string):
+def io_u_indirect(
+        root_path, 
+        SY_string, 
+        BY_string,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+
+    This function is to be used specifically for indirect emissions
+    of greenhouse gases.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
     """
     RY_string = str(int(SY_string)-2)
 
@@ -572,9 +645,9 @@ def io_u_indirect(root_path, SY_string, BY_string):
     in_U_BY_sheetname = None
     
 
-    in_U_BY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_BY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_BY_pathname = in_U_BY_foldername + in_U_BY_filename
-    in_U_RY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_RY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_RY_pathname = in_U_RY_foldername + in_U_RY_filename
 
     dict_io_u_inventory_crt = io_u_inventory_crt(root_path, SY_string, BY_string)   
@@ -599,9 +672,22 @@ def io_u_indirect(root_path, SY_string, BY_string):
     return dict_io_u
 
 
-def io_u_lulucf(root_path, SY_string, BY_string):
+def io_u_lulucf(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+
+    This function is to be used specifically for greenhouse gases, for the LULUCF sector only.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
     """
     
     RY_string = str(int(SY_string)-2)
@@ -617,9 +703,9 @@ def io_u_lulucf(root_path, SY_string, BY_string):
     in_U_RY_sheetname = "U_LULUCF_{}_sub{}".format(RY_string, SY_string)
     in_U_BY_sheetname = "U_LULUCF_{}_sub{}".format(BY_string, SY_string)
 
-    in_U_BY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_BY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_BY_pathname = in_U_BY_foldername + in_U_BY_filename
-    in_U_RY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_RY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_RY_pathname = in_U_RY_foldername + in_U_RY_filename
 
     dict_io_u_inventory_crt = io_u_inventory_crt(root_path, SY_string, BY_string)      
@@ -645,9 +731,23 @@ def io_u_lulucf(root_path, SY_string, BY_string):
 
 
 
-def io_u_inventory_nfr(root_path, SY_string, BY_string):
+def io_u_inventory_nfr(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+
+    This function is to be used specifically for pollutants, for the whole inventory.
+    The structure described below is the structure of the UNECE reporting template for Annex I (format: Excel).
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
     """
     
     dict_io_u = {}
@@ -666,9 +766,9 @@ def io_u_inventory_nfr(root_path, SY_string, BY_string):
     #in_U_BY_sheetname = "U_IIR_{}_sub{}".format(BY_string, SY_string)
     in_U_BY_sheetname = None
 
-    in_U_BY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_BY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_BY_pathname = in_U_BY_foldername + in_U_BY_filename
-    in_U_RY_foldername  = root_path + "input_data/input_sub" + SY_string + "/input_uncertainty/"
+    in_U_RY_foldername  = root_path + "\\input_data\\input_sub" + SY_string + "\\input_uncertainty\\"
     in_U_RY_pathname = in_U_RY_foldername + in_U_RY_filename
     
     in_header_u = None
@@ -755,9 +855,23 @@ def io_u_inventory_nfr(root_path, SY_string, BY_string):
 
 #XXX Below: define file structure to read input emissions
 
-def io_em_inventory_crt(root_path, SY_string):
+def io_em_inventory_crt(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+    
+    This function is to be used specifically for greenhouse gases, for the whole inventory.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
+        
     """
     
     #===========================================================================
@@ -773,7 +887,7 @@ def io_em_inventory_crt(root_path, SY_string):
     in_EM_RY_filename = "EM_GHGs_inventory_sub{}.xlsm".format(SY_string)
     in_EM_RY_sheetname = "EM_for_U_KCA"
 
-    in_EM_foldername = root_path + "input_data/input_sub" + SY_string + "/input_EM_GHG/"
+    in_EM_foldername = root_path + "\\input_data\\input_sub" + SY_string + "\\input_emission\\"
     in_EM_BY_pathname = in_EM_foldername + in_EM_BY_filename
     in_EM_RY_pathname = in_EM_foldername + in_EM_RY_filename
     
@@ -841,13 +955,24 @@ def io_em_inventory_crt(root_path, SY_string):
     return dict_io_em
 
 
-def io_em_indirect(root_path, SY_string):
+def io_em_indirect(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
-    Create exact path and names of Excel file(s) to read for the emissions and put all variables in a dictionnary.
+    Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
     
-    BY_string: base year in string format
-    RY_string: reporting year in string format
-    SY_string: submission year in string format
+    This function is to be used specifically for indirect emissions
+    of greenhouse gases.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
+        
     """
 
     #===========================================================================
@@ -863,7 +988,7 @@ def io_em_indirect(root_path, SY_string):
     in_EM_RY_filename = "EM_GHGs_indirect_sub{}.xlsm".format(SY_string)
     in_EM_RY_sheetname = "EM_for_U_KCA"
 
-    in_EM_foldername = root_path + "input_data/input_sub" + SY_string + "/input_EM_GHG/"
+    in_EM_foldername = root_path + "\\input_data\\input_sub" + SY_string + "\\input_emission\\"
     in_EM_BY_pathname = in_EM_foldername + in_EM_BY_filename
     in_EM_RY_pathname = in_EM_foldername + in_EM_RY_filename
     
@@ -931,9 +1056,23 @@ def io_em_indirect(root_path, SY_string):
 
 
 
-def io_em_lulucf(root_path, SY_string):
+def io_em_lulucf(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+    
+    This function is to be used specifically for greenhouse gases, for the LULUCF sector only.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
+        
     """
     
     #===========================================================================
@@ -949,7 +1088,7 @@ def io_em_lulucf(root_path, SY_string):
     in_EM_RY_filename = "EM_GHGs_inventory_sub{}.xlsm".format(SY_string)
     in_EM_RY_sheetname = "LULUCF_EM_for_U_KCA"
 
-    in_EM_foldername = root_path + "input_data/input_sub" + SY_string + "/input_EM_GHG/"
+    in_EM_foldername = root_path + "\\input_data\\input_sub" + SY_string + "\\input_emission\\"
     in_EM_BY_pathname = in_EM_foldername + in_EM_BY_filename
     in_EM_RY_pathname = in_EM_foldername + in_EM_RY_filename
     
@@ -1017,9 +1156,23 @@ def io_em_lulucf(root_path, SY_string):
 
 
 
-def io_em_inventory_nfr(root_path, SY_string):
+def io_em_inventory_nfr(
+        root_path: str, 
+        SY_string: str, 
+        BY_string: str,
+        ) -> dict:
     """
     Create exact path and names of Excel file(s) to read for the uncertainties and put all variables in a dictionnary.
+    
+    This function is to be used specifically for pollutants, for the whole inventory.
+    This function does not need yearly actualisation.
+    This function needs actualisation only if the input excel file structure should change.
+
+    Args:
+        root_path: root path where the files are saved.
+        SY_string: submission year in string format YYYY.
+        BY_string: base year in string format YYYY.
+        
     """
 
     #===========================================================================
@@ -1029,13 +1182,13 @@ def io_em_inventory_nfr(root_path, SY_string):
     RY_string = str(int(float(SY_string))-2)
     
     #set the name of the input emission file for the base year
-    in_EM_BY_filename = "UNECE {} Table 1 - 1990-1999.xlsm".format(SY_string) #UNECE {} Table 1 - 1990-1999
-    in_EM_BY_sheetname = "1990"
+    in_EM_BY_filename = "UNECE {} Annex I_NFR_1980-{}_CHE.xlsx".format(SY_string, RY_string)
+    in_EM_BY_sheetname = BY_string
     #set the name of the input emission file for the reporting year
-    in_EM_RY_filename = "UNECE {} Table 1 - 2010-{}.xlsm".format(SY_string, RY_string) #UNECE {} Table 1 - 2010-{}
+    in_EM_RY_filename = "UNECE {} Annex I_NFR_1980-{}_CHE.xlsx".format(SY_string, RY_string)
     in_EM_RY_sheetname = RY_string
 
-    in_EM_foldername = root_path + "input_data/input_sub" + SY_string + "/input_EM_pollutant/"
+    in_EM_foldername = root_path + "\\input_data\\input_sub" + SY_string + "\\input_emission\\"
     in_EM_BY_pathname = in_EM_foldername + in_EM_BY_filename
     in_EM_RY_pathname = in_EM_foldername + in_EM_RY_filename
     

@@ -29,13 +29,13 @@ import utils_constant as const
 
 
 def check_duplicate(
-        df,
-        in_pathname,
-        in_sheetname,
-        df_str_name,
-        in_col_unique,
+        df: pd.DataFrame,
+        in_pathname: str,
+        in_sheetname: str,
+        df_str_name: str,
+        in_col_unique: list,
         check_file,
-        ):
+        ) -> None:
 
     """Check for the presence of duplicate rows.
     
@@ -47,7 +47,7 @@ def check_duplicate(
         in_sheetname: sheet name of df. Used for QC.
         df_str_name: name of the dataframe as a string. Used for QC.
         in_col_unique: list of column names for which each row must be unique.
-        check_file:
+        check_file: already open text file where to write infos for QC.
         
     Return:
         None.
@@ -81,7 +81,7 @@ def check_duplicate(
 
     return None
 
-def check_reso_id_default(df):
+def check_reso_id_default(df: pd.DataFrame) -> pd.DataFrame:
     """Check input string for resource and fill with default string in case of blank.
     
     Args:
@@ -110,29 +110,95 @@ def check_reso_id_default(df):
             
     return df
 
-def select_fuel_sold_used(df, use_fuel_used):
+def select_fuel_sold_used(
+        df: pd.DataFrame, 
+        use_fuel_used: bool,
+        check_file,
+        ) -> pd.DataFrame:
+    """Remove source categories (rows) that do not correspond to the chosen method.
+    
+    The chosen methods are: fuel sold or fuel used.
+    In the CLRTAP nomenclature, names of source categories for fuel used contain the string "(fu)".
+    This feature is used here to distinguish between fuel used and fuel sold source categories.
+    Noe that this distinction is applicable only for the source categories listed in:
+        const.PROC_CODE_FUEL_SOLD
+        const.PROC_CODE_FUEL_USED
+        
+    For greenhouse gas inventory, a priori the method should be fuel sold.
+    For safety reason, the fuel sold method is applied only if the corresponding
+    names for the source categories are found.
+    
+    This function does not check that each code for fuel used has an exact match for fuel sold
+    (or vice versa),
+    this would require to check the resources and compounds as well.
+    
+    """
+    
+    #print("check fuel sold fuel used, set to {}.".format(use_fuel_used))
 
     #Fuel sold vs fuel used: keep correct nomenclature names and drop the others
     if "proc_code" in df.columns:
+        index_fuel_sold_len = len(df.index[df["proc_code"].isin(const.PROC_CODE_FUEL_SOLD)].tolist())
+        index_fuel_used_len = len(df.index[df["proc_code"].isin(const.PROC_CODE_FUEL_USED)].tolist())
+        
+        #print("number of found indexes for fuel sold: {}.".format(len(index_fuel_sold)))
+        #print("number of found indexes for fuel used: {}.".format(len(index_fuel_used)))
+
         if use_fuel_used:
-            #drop rows that contain any value in the list
-            #https://www.statology.org/pandas-drop-rows-with-value/
-            df = df[df["proc_code"].isin(const.PROC_CODE_FUEL_SOLD) == False]
-        else:
-            #drop rows that contain any value in the list
-            #https://www.statology.org/pandas-drop-rows-with-value/
-            df = df[df["proc_code"].isin(const.PROC_CODE_FUEL_USED) == False]
+            if index_fuel_used_len == 0 and index_fuel_sold_len > 0:
+                check_file.write(
+                        "The chosen inventory type is fuel used but no source categories were found for fuel used. Please check your input files or try setting use_fuel_used to False."
+                        )
+                check_file.close()
+                raise ValueError(
+                        "The chosen inventory type is fuel used but no source categories were found for fuel used. Please check your input files or try setting use_fuel_used to False."
+                        )
+
+            elif index_fuel_used_len > 0 and index_fuel_used_len < index_fuel_sold_len:
+                check_file.write(
+                        "The chosen inventory type is fuel used. Source categories were found for fuel sold but (some) corresponding source categories were not found for fuel used. Please check your input files."
+                        )
+                check_file.close()
+                raise ValueError("The chosen inventory type is fuel used. Source categories were found for fuel sold but (some) corresponding source categories were not found for fuel used. Please check your input files.")
+            
+            else:
+                #drop rows that contain any value in the list
+                #https://www.statology.org/pandas-drop-rows-with-value/
+                df = df[df["proc_code"].isin(const.PROC_CODE_FUEL_SOLD) == False]
+
+        else: #use fuel sold
+            if index_fuel_sold_len == 0 and index_fuel_used_len > 0:
+                check_file.write(
+                        "The chosen inventory type is fuel sold but no source categories were found for fuel sold, while at least one was found for fuel used. Please check your input files or try setting use_fuel_used to True."
+                        )
+                check_file.close()
+                raise ValueError(
+                        "The chosen inventory type is fuel sold but no source categories were found for fuel sold, while at least one was found for fuel used. Please check your input files or try setting use_fuel_used to True."
+                        )
+
+            elif index_fuel_sold_len > 0 and index_fuel_sold_len < index_fuel_used_len:
+                check_file.write(
+                        "The chosen inventory type is fuel sold. Source categories were found for fuel used but (some) corresponding source categories were not found for fuel sold. Please check your input files."
+                        )
+                check_file.close()
+                raise ValueError(
+                        "The chosen inventory type is fuel sold. Source categories were found for fuel used but (some) corresponding source categories were not found for fuel sold. Please check your input files."
+                        )
+            else:
+                #drop rows that contain any value in the list
+                #https://www.statology.org/pandas-drop-rows-with-value/
+                df = df[df["proc_code"].isin(const.PROC_CODE_FUEL_USED) == False]
                 
     return df
 
 
 def check_main(
-        df,
-        df_main, #this is the table containing the defintion of the text, i.e. list of allowed text.
+        df: pd.DataFrame,
+        df_main: pd.DataFrame, #this is the table containing the defintion of the text, i.e. list of allowed text.
         col_left: list,
         col_right: list,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     
     """Checks if values are contained in a list of main (allowed) values.
 
@@ -187,12 +253,12 @@ def check_main(
 
 
 def merge_with_main(
-        df,
-        df_main,
+        df: pd.DataFrame,
+        df_main: pd.DataFrame,
         merge_with_main_left,
         merge_with_main_right,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     """Merge two DataFrames based on specific merge columns, equivalent to SQL join.
 
     Merge two pandas DataFrame based on match between values in specified columns
@@ -262,15 +328,15 @@ def merge_with_main(
     return df
 
 def merge_with_proc(
-        df,
-        df_proc,
+        df: pd.DataFrame,
+        df_proc: pd.DataFrame,
         col_from_main, #columns to use from the main (primary) df
         col_merge_left_on, #cols to merge on from df
         col_merge_right_on, #cols to merge on from primary df
         col_merge_drop_left,
         col_name_proc_id,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     
     """Merge a DataFrame with the primary DataFrame for process nomenclature.
     
@@ -371,17 +437,17 @@ def read_excel_nomenc_def(
         col_from_main_proc,
         col_merge_left_on_proc,
         col_merge_right_on_proc,
-        df_proc,
+        df_proc: pd.DataFrame,
         col_check_left_on_comp,
         col_check_right_on_comp,
-        df_comp,
+        df_comp: pd.DataFrame,
         col_check_left_on_reso,
         col_check_right_on_reso,
-        df_reso,
+        df_reso: pd.DataFrame,
         comp_string,
         use_fuel_used,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     """read columns defining source categories.
     
     For the general case, these columns are: proc_id (or proc_name, proc_code, proc_class),
@@ -416,7 +482,7 @@ def read_excel_nomenc_def(
     df.dropna(subset=["proc_class"], inplace=True) #.reset_index(drop = True)
 
     #Fuel sold vs fuel used: keep correct nomenclature names and drop the others
-    df = select_fuel_sold_used(df, use_fuel_used)
+    df = select_fuel_sold_used(df, use_fuel_used, check_file)
     
     
     #---------------------------------------------
@@ -475,10 +541,10 @@ def read_excel_nomenc_def(
 
 
 def input_em_data_check(
-        df,
-        input_year,
+        df: pd.DataFrame,
+        input_year: str,
         check_file,
-        ):
+        ) -> pd.DataFrame:
 
     """Check input emissions (notation keys or values).
 
@@ -535,20 +601,16 @@ def input_em_data_check(
 
 
 def input_u_data_preparation(
-        df, 
+        df: pd.DataFrame, 
         input_type: str, 
         input_year: str,
-        factor_conv_u_input: float,
-        factor_conv_u_percent_to_fraction: float,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     """Check that input parameters for uncertainties are statistically valid.
     
     :arg df: pandas data frame containing row data
     :arg input_type: string: AD, EF, EM
     :arg input_year: string: BY, RY.
-    :arg factor_conv_u_input:
-    :arg factor_conv_u_percent_to_fraction:
     :arg check_file
     
     """
@@ -699,30 +761,30 @@ def input_u_data_preparation(
     df[u_upper_f] = [np.float(val) if (isinstance(val, Number) and not pd.isnull(val)) else np.float(0.0) for val in df[u_upper_f].copy()]
     
     #For all distribution types, convert input in percent to fraction
-    df[u_sym_f] = df[u_sym_f] / factor_conv_u_percent_to_fraction
-    df[u_lower_f] = df[u_lower_f] / factor_conv_u_percent_to_fraction
-    df[u_upper_f] = df[u_upper_f] / factor_conv_u_percent_to_fraction
+    df[u_sym_f] = df[u_sym_f] / float(100.0)
+    df[u_lower_f] = df[u_lower_f] / float(100.0)
+    df[u_upper_f] = df[u_upper_f] / float(100.0)
 
-    #For symetric distribution types, divide by the coverage factor of 2
-    df[u_sym_f].iloc[index_u_dist_sym] = df[u_sym_f].iloc[index_u_dist_sym] / factor_conv_u_input
+    #For symetric distribution types, we need to transform a 95% confidence interval to a standard deviation
+    #because according to metrology standards, the variance (square of standard deviation) should be propagated, not the 95% confidence interval.
+    df[u_sym_f].iloc[index_u_dist_sym] = df[u_sym_f].iloc[index_u_dist_sym] / const.FACTOR_U_DIST_95_PERCENT
     df[u_lower_f].iloc[index_u_dist_sym] = df[u_sym_f].iloc[index_u_dist_sym]
     df[u_upper_f].iloc[index_u_dist_sym] = df[u_sym_f].iloc[index_u_dist_sym]
 
-    #For the triangular distribution, do not divide by the coverage factor of 2.
+    #For the triangular distribution, do not divide by the coverage factor const.FACTOR_U_DIST_95_PERCENT.
+    #We need to keep the exact edges of the distribution.
         
-    #if input_year == "RY":
-        #read correlation data for the reporting year only
+
     df[u_corr] = [True if val == const.STRING_CORRELATED else False for val in df[u_corr]]
     
-
     return df
 
 
 def input_u_data_check_completeness_per_year(
-        df,
-        input_year,
+        df: pd.DataFrame,
+        input_year: str,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     """
     Perform quality checks on the input uncertainties for AD, EF and EM for a given year (BY or RY).
     
@@ -779,9 +841,9 @@ def input_u_data_check_completeness_per_year(
 
 
 def input_u_data_check_correlation(
-        df,
+        df: pd.DataFrame,
         check_file,
-        ):
+        ) -> pd.DataFrame:
     """Check that if input u for BY and RY are correlated, input dist and values must be exactly the same.
     
     Otherwise, set data as not correlated between base year and reporting year.
@@ -836,11 +898,11 @@ def input_u_data_check_correlation(
 def check_dist_triangular(
         u_lower_p,
         u_upper_p,
-        proc,
-        comp, #used to give input line in case the compound is not known (old method).
-        reso,
-        year_string, #BY or RY,
-        type_string,  #AD, EF or EM
+        proc: str,
+        comp: str, #used to give input line in case the compound is not known (old method).
+        reso: str,
+        year_string: str, #BY or RY,
+        type_string: str,  #AD, EF or EM
         check_file,
         ):
     #XXX Check if the input parameters for the triangular distribution are statistically valid
@@ -864,14 +926,12 @@ def check_dist_triangular(
             cause_text = "Mode > u_edge_upper: mode - u_edge_upper = {}".format(mode - u_edge_upper)
     
         if u_lower_p > u_upper_p:
-            #check_file.write("Triangular U input not valid for {} {} {} {}. Mode < u_edge_lower. Since lower U > upper U, use normal disttribution instead.\n".format(string, nomenc, comp, reso))
             #use a normal distribution instead
             dist = const.DIST_NORMAL
             u_upper_p = u_lower_p
             solution_text = "Since lower U > upper U, use normal disttribution instead"
         elif u_lower_p < u_upper_p:
-            #check_file.write("Triangular U input not valid for {} {} {} {}. Mode < u_edge_lower. Since lower U > upper U, use gamma distribution instead.\n".format(string, nomenc, comp, reso))
-            #use a normal distribution instead
+            #use a gamma distribution instead
             dist = const.DIST_GAMMA
             u_lower_p = u_upper_p
             solution_text = "Since lower U > upper U, use gamma distribution instead"
@@ -883,13 +943,13 @@ def check_dist_triangular(
 
 
 def find_index_inventory_total(
-        df,
-        proc_id_total,
-        comp_id_total,
-        reso_id_total,
-        text,
+        df: pd.DataFrame,
+        proc_id_total: str,
+        comp_id_total: str,
+        reso_id_total: str,
+        text: str,
         check_file,
-        ):
+        ) -> int:
     
     """    Find the index of the DataFrame corresponding to the inventory total emission.
     

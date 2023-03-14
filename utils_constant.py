@@ -26,47 +26,64 @@ PEP 8 stype recommendation:
 """
 #Set EMEP and IPCC requirements
 
+#===================================================
+#OFFICIAL REQUIREMENTS FOR THE UNCERTAINTY ANALYSIS
+#===================================================
+
+#The requirements are the same for the EMEP and IPCC guidelines.
 #output results: set confidence interval as 95% of distribution
-P_DIST = 0.95 #search interval that covers 95% of distribution
+P_DIST = float(0.95) #search interval that covers 95% of distribution
 #set edge values for a centered confidence interval
-DIST_PPF_EDGE_LOWER = 0.025
-DIST_PPF_EDGE_UPPER = 0.975
+DIST_PPF_EDGE_LOWER = float(0.025)
+DIST_PPF_EDGE_UPPER = float(0.975)
+
+#===================================================
+#OFFICIAL REQUIREMENTS FOR THE KEY CATEGORY ANALYSIS
+#===================================================
 
 #EMEP reporting requirements for key category analysis
-KCA_1_P_IIR = 0.8 #KCA approach 1 (without U), set threshold as 80% of all emissions
-KCA_1_P_EXT_IIR = 0.85
-KCA_2_P_IIR = 0.8  #KCA approach 2 (with U),    set threshold as 80% of all emissions
-KCA_2_P_EXT_IIR = 0.85
+KCA_1_P_IIR = float(0.8) #KCA approach 1 (without U), set threshold as 80% of all contributions
+KCA_2_P_IIR = float(0.8) #KCA approach 2 (with U),    set threshold as 80% of all contributions
+#EMEP extended criteria to display additional, non-key-categories in result lists and tables
+KCA_1_P_EXT_IIR = float(0.85)
+KCA_2_P_EXT_IIR = float(0.85)
 
 #IPCC reporting requirements for key category analysis
-KCA_1_P_NID = 0.95 #KCA approach 1 (without U), set threshold as 80% of all emissions
-KCA_1_P_EXT_NID = 0.97
-KCA_2_P_NID = 0.9  #KCA approach 2 (with U),    set threshold as 80% of all emissions
-KCA_2_P_EXT_NID = 0.92
+KCA_1_P_NID = float(0.95) #KCA approach 1 (without U), set threshold as 95% of all contributions
+KCA_2_P_NID = float(0.9)  #KCA approach 2 (with U),    set threshold as 90% of all contributions
+#IPCC extended criteria to display additional, non-key-categories in result lists and tables
+KCA_1_P_EXT_NID = float(0.97)
+KCA_2_P_EXT_NID = float(0.92)
 
 #Constants to handle input data
-#for IIR, input data are very small 
+#for IIR, input data are all in tons (t) and values ar quite small
 #and therefore require a large number of significant digit
-#so instead we convert the input data and multiply by a factor thousand
+#so instead we convert the input data and multiply by a factor thousand,
+#results will be expressed in kt
 IIR_FACTOR_CONV_EM_UNIT = float(1000.0)
 
 #for NID we use input values as they are, we do not convert to any other unit
 NID_FACTOR_CONV_EM_UNIT = float(1.0)
 
-#input uncertainty data: transform 2 sigmas to 1 sigma
-IIR_FACTOR_CONV_U_INPUT = float(2.0) #transform 2 sigmas to 1 sigma
-NID_FACTOR_CONV_U_INPUT = float(2.0) #transform 2 sigmas to 1 sigma
-FACTOR_CONV_U_INPUT = float(2.0)
+#value to convert s standard deviation (1 sigma) 
+#to a 95% confidence interval for a normal distribution
+#and vice versa
+FACTOR_U_DIST_95_PERCENT = float(1.96) 
 
-#input uncertainty data: transform percent to fraction
-IIR_FACTOR_CONV_U_PERCENT_TO_FRACTION = float(100.0) #GMY 20221213 U input for IIR also in percent (numeric value is in percent, it does'n just appear in percent formating in excel)
-NID_FACTOR_CONV_U_PERCENT_TO_FRACTION = float(100.0)
-FACTOR_CONV_U_PERCENT_TO_FRACTION = float(100.0)
+#string in the input uncertainty file used to stipulate that two variables are corelated
+STRING_CORRELATED_DE = "korreliert" #in German
+STRING_CORRELATED_EN = "correlated" #in English
+STRING_CORRELATED = STRING_CORRELATED_DE
 
-#python uncertainties are 1 sigma fraction, in fraction of mean
-#they are converted to 2 sigma in percent of mean to write output results to excel
-FACTOR_CONV_U_INPUT_TO_EXCEL = float(200.0)
+IIR_UNIT_STRING = "t"
 
+NID_UNIT_STRING = "kt CO2 eq."
+NID_UNIT_STRING_SHORT = "kt CO2 eq."
+NID_UNIT_STRING_LATEX = "kt CO$_2$ eq."
+
+#===================================================
+#SET OUTPUT FORMATTING
+#===================================================
 
 #Set output format to write numbers in Excel sheets
 #The following style use a comma as thousand separator.
@@ -90,7 +107,7 @@ FORMAT_VAL_6D = "#,##0.000000"
 #format in excel to allign on the decimal point
 #https://www.extendoffice.com/documents/excel/1951-excel-align-decimal-points.html
 #use only after appropriate rounding has been applied
-#TODO GMY 20230214 this formatting does not work so far.
+#TODO 20230214 this formatting does not work so far.
 #FORMAT_VAL_ALIGNED_0D = "#,##0.?"
 FORMAT_VAL_ALIGNED_1D = "0.?"
 FORMAT_VAL_ALIGNED_2D = "0.??"
@@ -122,32 +139,6 @@ IIR_FORMAT_VAL_U_INPUT = "##0"
 #max number of lines in an excel table that is later inserted into a Word document
 FORMAT_LINE_PER_PAGE_EXCEL = 65
 
-#Constants for Python routines
-#assign an integer to each supported distribution type
-DIST_UNIFORM = 0
-DIST_NORMAL = 1
-DIST_TRIANGULAR = 2
-DIST_GAMMA = 3
-DIST_LOGNORMAL = 4
-DIST_FRACTILE = 5
-
-#string in the input uncertainty file used to stipulate that two variables are corelated
-STRING_CORRELATED = "korreliert"
-
-#assign an integer to each supported routine type
-
-ROUTINE_IIR = 0
-ROUTINE_NID = 1
-ROUTINE_IIR_WITHOUT_U = 2
-
-IIR_UNIT_STRING = "t"
-
-
-NID_UNIT_STRING = "kt CO2 eq."
-NID_UNIT_STRING_SHORT = "kt CO2 eq."
-NID_UNIT_STRING_LATEX = "kt CO$_2$ eq."
-
-
 #COLORS
 #Use this to convert RGB to Excel code:
 #https://www.rapidtables.com/convert/color/rgb-to-hex.html
@@ -161,21 +152,37 @@ COLOR_RY = 'xkcd:blue'
 COLOR_GRID = "xkcd:grey" #light grey
 
 
-#write current directory here
-#manually needed until I find a better method
-ROOT_PATH = "C:/Users/U80862383/local_documents/python_projects_libs/python_u_and_kca/"
-#ROOT_PATH = "C:/Users/U80862383/python_code/python_u_and_kca/"
-#ROOT_PATH = "R:/Prod/EMIS/Doku/Sub 2022/F_Unsicherheiten und KCA/python_u_and_kca/"
+#Constants for Python routines
+#assign an integer to each supported distribution type
+DIST_UNIFORM = 0
+DIST_NORMAL = 1
+DIST_TRIANGULAR = 2
+DIST_GAMMA = 3
+DIST_LOGNORMAL = 4
+DIST_FRACTILE = 5
+
+
+#assign an integer to each supported routine type
+ROUTINE_IIR = 0
+ROUTINE_NID = 1
+ROUTINE_IIR_WITHOUT_U = 2
+
+
+
 
 IIR_NOMENC_CLASS_ID = "NFR"
 NID_NOMENC_CLASS_ID = "CRT"
 
+#List of recognised notation keys
 NOTATION_KEY = ["NA", "NO", "NE", "IE", "C", "ES"]
 
 INDIRECT_GASES = ["Indirect CO2 from CO", "Indirect CO2 from NMVOC", "Indirect CO2 from CH4"]
 
+#list of compounds to report for a specific "indirect emissions" run
 COMP_TOTAL_NID_INDIRECT = ["CO2 fossil ox CH4", "CO2 fossil ox CO", "CO2 fossil ox NMVOC total"]
+#list of compounds to report for the NID, for the whole inventory
 COMP_TOTAL_NID = ["CO2", "CH4", "N2O", "HFCs", "PFCs", "SF6", "NF3", "CO2 fossil ox. total"]
+#list of compounds to report for the IIR, for the whole inventory
 COMP_TOTAL_IIR = ["NOx", "NMVOC", "SOx", "NH3", "PM2.5", "PM10"]
 
 PROC_CODE_SECTOR_TOTAL = ["1", "2", "3", "4", "5", "6"]
@@ -186,8 +193,5 @@ IIR_PROC_ID_TOTAL = "NFR Total"
 RESO_TOTAL = "Total"
 RESO_TOTAL_INTERMEDIATE = "All resources"
 
-PROC_CODE_FUEL_SOLD = ["1A3bi", "1A3bii", "1A3biii", "1A3biv" , "1A3bv" , "1A3bvi" , "1A3bvii"]
-PROC_CODE_FUEL_USED = ["1A3bi(fu)", "1A3bii(fu)", "1A3biii(fu)", "1A3biv(fu)" , "1A3bv(fu)" , "1A3bvi(fu)" , "1A3bvii(fu)"]
-
-#PROC_ID_FUEL_SOLD = ["NFR 1A3bi", "NFR 1A3bii", "NFR 1A3biii", "NFR 1A3biv" , "NFR 1A3bv" , "NFR 1A3bvi" , "NFR 1A3bvii"]
-#PROC_ID_FUEL_USED = ["NFR 1A3bi(fu)", "NFR 1A3bii(fu)", "NFR 1A3biii(fu)", "NFR 1A3biv(fu)" , "NFR 1A3bv(fu)" , "NFR 1A3bvi(fu)" , "NFR 1A3bvii(fu)"]
+PROC_CODE_FUEL_SOLD = ["1A3b", "1A3bi", "1A3bii", "1A3biii", "1A3biv" , "1A3bv" , "1A3bvi" , "1A3bvii"]
+PROC_CODE_FUEL_USED = ["1A3b(fu)", "1A3bi(fu)", "1A3bii(fu)", "1A3biii(fu)", "1A3biv(fu)" , "1A3bv(fu)" , "1A3bvi(fu)" , "1A3bvii(fu)"]

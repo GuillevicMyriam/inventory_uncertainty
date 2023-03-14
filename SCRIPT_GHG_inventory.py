@@ -25,7 +25,7 @@ for the NID, according to the CRT nomenclature.
 
 
 import utils_constant as const
-from routine_u_kca_pd import routine_u_kca_prepare_data
+from routine_u_kca import routine_u_kca_wrapper
 from utils_io_file_structure import io_nomenc
 
 #import specific for this script: for the whole inventory
@@ -33,7 +33,7 @@ from utils_io_file_structure import io_u_inventory_crt, io_em_inventory_crt, io_
 
 import pathlib
 root_path = pathlib.Path().resolve()
-
+root_path= str(root_path)
 #===========================================================================
 # CHOOSE PROPERTIES
 #===========================================================================
@@ -65,13 +65,13 @@ dict_io_nomenc = io_nomenc(root_path, sub_string)
 
 #load specific data structure description
 dict_io_u = io_u_inventory_crt(root_path, sub_string, BY_string) #for input uncertainties
-dict_io_em = io_em_inventory_crt(root_path, sub_string) #for input emissions
-dict_io_out = io_out_inventory_crt(root_path, sub_string, make_new_output_folder) #for target output files
+dict_io_em = io_em_inventory_crt(root_path, sub_string, BY_string) #for input emissions
+dict_io_out = io_out_inventory_crt(root_path, sub_string, BY_string, make_new_output_folder) #for target output files
 
-comp_total = const.COMP_TOTAL #list of strings with compounds to report
+comp_total = const.COMP_TOTAL_NID #list of strings with compounds to report
 routine = const.ROUTINE_NID #use ROUTINE_NID for NID reporting, routine_IIR for IIR reporting.
 
-routine_u_kca_prepare_data(
+routine_u_kca_wrapper(
         routine = routine,
         BY_string = BY_string,
         RY_string = RY_string,
@@ -85,5 +85,3 @@ routine_u_kca_prepare_data(
         use_fuel_used = use_fuel_used,
         root_path = root_path,
               )
-
-

@@ -606,7 +606,7 @@ def routine_u_kca_computations(
             check_file.write("Code <{}>: missing input for BY.\n".format(df_EM_BY_RY["proc_id"].iloc[i]))
             count_missing_data += 1
             
-        #Done GMY 20230216 Derive status and is_num from emissions
+        #Done  20230216 Derive status and is_num from emissions
         if df_EM_BY_RY["EM_status_BY"].iloc[i] == df_EM_BY_RY["EM_status_RY"].iloc[i]:
             df_EM_BY_RY["EM_status_trend_normed"].iloc[i] = df_EM_BY_RY["EM_status_RY"].iloc[i]
         elif df_EM_BY_RY["EM_status_BY"].iloc[i] == "ES" or df_EM_BY_RY["EM_status_RY"].iloc[i] == "ES":
@@ -666,8 +666,6 @@ def routine_u_kca_computations(
             df = df_u_RY, 
             input_type = "AD", 
             input_year = "RY",
-            factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-            factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
             check_file = check_file,
             )
     
@@ -675,8 +673,6 @@ def routine_u_kca_computations(
             df = df_u_RY, 
             input_type = "EF", 
             input_year = "RY",
-            factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-            factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
             check_file = check_file,
             )
     
@@ -685,8 +681,6 @@ def routine_u_kca_computations(
                 df = df_u_RY, 
                 input_type = "EM", 
                 input_year = "RY",
-                factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-                factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
                 check_file = check_file,
                 )
     else:
@@ -730,8 +724,6 @@ def routine_u_kca_computations(
                 df = df_u_BY, 
                 input_type = "AD", 
                 input_year = "BY",
-                factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-                factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
                 check_file = check_file,
                 )
         
@@ -739,8 +731,6 @@ def routine_u_kca_computations(
                 df = df_u_BY, 
                 input_type = "EF", 
                 input_year = "BY",
-                factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-                factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
                 check_file = check_file,
                 )
     
@@ -749,8 +739,6 @@ def routine_u_kca_computations(
                     df = df_u_BY, 
                     input_type = "EM", 
                     input_year = "BY",
-                    factor_conv_u_input = const.FACTOR_CONV_U_INPUT,
-                    factor_conv_u_percent_to_fraction = const.FACTOR_CONV_U_PERCENT_TO_FRACTION,
                     check_file = check_file,
                     )
         else:
@@ -977,11 +965,11 @@ def routine_u_kca_computations(
         use_col_agg_reso = ["parent_id_reso", "depth_id_reso"]
     
     
-    
+
     #============================================================================
     # COMPUTE UNCERTAINTY PROPAGATION (APPROACH 1)
     #============================================================================ 
-    #TODO GMY 20230215: use results from approach 1 as approximate results
+    #TODO  20230215: use results from approach 1 as approximate results
     #to guess partition values for simulated values for Monte Carlo,
     #in order to reduce computation time.
     
@@ -1016,7 +1004,6 @@ def routine_u_kca_computations(
             df_pr_agg = groupby_one_attribute_pd(
                     df = df_pr_agg,
                     df_agg_tree = df_agg_tree_proc,
-                    use_cols_for_agg = use_cols_for_agg,
                     agg_str = "_proc",
                     child_id_left = "proc_id",
                     col_unique_groupby_extra = ["reso_id", "comp_id"],
@@ -1027,7 +1014,6 @@ def routine_u_kca_computations(
             df_pr_agg = groupby_one_attribute_pd(
                     df = df_pr_agg,
                     df_agg_tree = df_agg_tree_comp,
-                    use_cols_for_agg = use_cols_for_agg,
                     agg_str = "_comp",
                     child_id_left = "comp_id",
                     col_unique_groupby_extra = ["reso_id", "proc_id"],
@@ -1038,7 +1024,6 @@ def routine_u_kca_computations(
             df_pr_agg = groupby_one_attribute_pd(
                     df = df_pr_agg,
                     df_agg_tree = df_agg_tree_reso,
-                    use_cols_for_agg = use_cols_for_agg,
                     agg_str = "_reso",
                     child_id_left = "reso_id",
                     col_unique_groupby_extra = ["comp_id", "proc_id"],
@@ -1303,7 +1288,7 @@ def routine_u_kca_computations(
     
     for i_code in range(no_nomenc_in):        
     
-        #GMY 20230210 We do not do sensitivity analysis
+        # 20230210 We do not do sensitivity analysis
         #between neither AD and inventory EM
         #nor between EF and inventory EM
         #so we need to store mc results for AD and EF only to compute EM, for each process
@@ -1635,7 +1620,7 @@ def routine_u_kca_computations(
                             by = [parent_id] + col_unique_groupby_extra + [depth_id]).sum().reset_index()
     
                     
-                    #TODO GMY 20230216 The next loop is very slow. 
+                    #TODO  20230216 The next loop is very slow. 
                     #Find a better way using .agg
                     df_agg_mc[col_EM_status] = "ES"
                     #df_agg_mc["EM_is_num_BY"] = True
@@ -1672,7 +1657,7 @@ def routine_u_kca_computations(
                     
                     
                     #Concatenate the aggregated rows with the original DataFrame, to get all results into one DataFrame
-                    #TODO GMY 20230217: think abut a less memory-intensive method.
+                    #TODO  20230217: think abut a less memory-intensive method.
                     #The problem is, such intermediate results are needed for subsequent aggregations.
                     df_EM_u_mc = pd.concat([df_EM_u_mc, df_agg_mc], axis =0, ignore_index=True)
     
@@ -1777,7 +1762,7 @@ def routine_u_kca_computations(
                 np_slice = np.array([val for val in df_slice])
                 
         
-                #TODO GMY 20230113 the line above is absolutely not optimal but I could not find a better way so far.
+                #TODO  20230113 the line above is absolutely not optimal but I could not find a better way so far.
                 #other options require a more up-to-date version of pandas.
                 #df_slice = df_slice.to_numpy() #only for pandas >= 0.24.1        
                 #print(np_slice.dtype)       

@@ -34,25 +34,25 @@ import utils_constant as const
 #HINT Various functions hereafter are used to write results to Excel files.
 
 def write_pr_mc_results(
-        df_in,
-        df_pr,
-        df_pr_AD_EF,
-        df_mc,
-        df_mc_AD_EF,
-        index_pr_total,
+        df_in: pd.DataFrame,
+        df_pr: pd.DataFrame,
+        df_pr_AD_EF: pd.DataFrame,
+        df_mc: pd.DataFrame,
+        df_mc_AD_EF: pd.DataFrame,
+        index_pr_total: int,
         index_pr_proc_sector_total,
         index_pr_comp_total,
         index_pr_inv_with_without_lulucf,
-        index_mc_total,
+        index_mc_total: int,
         index_mc_proc_sector_total,
         index_mc_comp_total,
         index_mc_inv_with_without_lulucf,
-        BY_string,
-        RY_string,
-        no_mc,
-        routine,
+        BY_string: str,
+        RY_string: str,
+        no_mc: int,
+        routine: int,
         filename_out,
-        ):
+        ) -> None:
     #HINT Write results of the uncertainty analysis to Excel for the UNECE/UNFCCC reporting
     """Write results of the uncertainty analysis to Excel for the UNECE/UNFCCC reporting.
     

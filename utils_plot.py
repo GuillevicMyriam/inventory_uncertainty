@@ -38,13 +38,18 @@ def plot_distributions_EM_trend(
         trend_EMsum_MCM_mean,
         trend_EMsum_MCM_stddev,
         trend_EMsum_MCM,
-        gas_string,
-        gas_string_latex,
-        BY_string,
-        RY_string,
-        unit_string,
-        output_filename):
-
+        gas_string: str,
+        gas_string_latex: str,
+        BY_string: str,
+        RY_string: str,
+        unit_string: str,
+        output_filename) -> None:
+    """Plot distribution of results obtained by Monte Carlo simulation as a bar plot.
+    
+    Distribution of emissions for the base year and the reporting year are shown together a the top subplot.
+    Distribution for the trend is shown on the bottom subplot.
+    
+    """
 
     color_alpha = 0.5
     text_size = 10
@@ -125,8 +130,6 @@ def plot_distributions_EM_trend(
     
     
     fig_name = output_filename + ".png"
-    #fig_path = cl_path.dict_path['fragments']
-    #fig_file = fig_path/fig_name
     plt.savefig(fig_name, bbox_inches='tight', transparent = True, dpi = 300)
     
     plt.show()
@@ -140,11 +143,11 @@ def tornado_plot_EM_BY_RY(
         nomenc_list_i, 
         sensitivity_BY, 
         sensitivity_RY, 
-        BY_string, 
-        RY_string, 
-        gas_string_latex,
-        output_figname
-        ):
+        BY_string: str, 
+        RY_string: str, 
+        gas_string_latex: str,
+        output_figname,
+        ) -> None:
     """
     Plot tornado plot using sensitivity results.
     Exclude nan values!
@@ -167,41 +170,32 @@ def tornado_plot_EM_BY_RY(
     #it seems the label for y-axis does not work well if too many ticks
     
     #plot histogram of sum of emission from the chosen nomenclature codes, as obtained from MC simulations
-    #plot figure with 3 subplots: distributions for BY EM, RY EM, trend
+    #plot figure with 2 subplots: distributions for BY EM and RY EM together, and trend
     #plot histograms of likelihood values for true and false fragments/maximal elements
     #fig, ax = plt.subplots(figsize=(8,4), nrows=1, ncols=2, sharey=False) #, nrows=1, ncols=2, sharex=True
     fig, ax = plt.subplots(figsize=(6,7), nrows=2, ncols=1, sharex=True)
 
 
     if gas_string_latex is not None:
-        #gas_string_latex = dict_gas_latex[gas_string]
 
         #fig.suptitle(gas_string_latex + ", " + year_string + ": Sensitivity of total emission" + "\n" + " to contributions from categories")
         label_BY = gas_string_latex + ", " + BY_string
         label_RY = gas_string_latex + ", " + RY_string
-        #output_figname = output_folder_name + "MC_tornado_plot_" + gas_string + "_EM_" + BY_string + "_" + RY_string + ".png"
 
     else:
         #fig.suptitle('Sensitivity of total emission to contributions from categories')
         label_BY = BY_string
         label_RY = RY_string
-        #output_figname = output_folder_name + "MC_tornado_plot_EM_" + BY_string + "_" + RY_string + ".png"
 
     #****BY**************    
     #remove nan values
-    #indexes_notnan = np.logical_not(np.isnan(sensitivity))
-    #NFR_list = NFR_list[np.logical_not(np.isnan(sensitivity))]
-    #NFR_list = [NFR_list[idx] for idx in indexes_notnan]
-    #sensitivity = [sensitivity[idx] for idx in indexes_notnan]
     indexes_nan = np.isnan(sensitivity_BY)
-    #print(len(indexes_nan))
-    #print(indexes_nan)
     nomenc_list = [nomenc_list_i[i] for i in range(len(indexes_nan)) if indexes_nan[i] == False]
     sensitivity = [sensitivity_BY[i] for i in range(len(indexes_nan)) if indexes_nan[i] == False]
     
     #sort by sensitivity estimator, by decreasing order    
     y_pos_ordered_inc = np.argsort(np.abs(sensitivity))
-    y_pos_ordered = y_pos_ordered_inc[::-1] #take in decrasing order of importance!
+    y_pos_ordered = y_pos_ordered_inc[::-1] #take in decreasing order of sensitivity!
     
     #keep only the first 20 values
     max_nomenc = min (20, len(y_pos_ordered))
@@ -245,14 +239,6 @@ def tornado_plot_EM_BY_RY(
     ax[1].set_xlabel('Sensitivity [normalised value between -1 and +1]', fontsize=text_size) #Correlation coefficient between total emissions and category emission
 
 
-    #if sensitivity_max != None:
-    #    ax[0].set_xlim([0, sensitivity_max])
-    #    ax[1].set_xlim([0, sensitivity_max])
-
-        
-        
-    #fig_path = cl_path.dict_path['fragments']
-    #fig_file = fig_path/fig_name
     plt.savefig(output_figname, bbox_inches='tight', transparent = True, dpi = 300)
     
     plt.show()

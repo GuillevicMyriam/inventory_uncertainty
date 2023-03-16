@@ -7,11 +7,9 @@ The present method propagates the uncertainties from individual categories accor
 - uncertainty propagation (for inventory reporting: also known as "Approach 1");
 - Monte Carlo simulations (for inventory reporting: also known as "Approach 2").
 
-The uncertainty propagation method follows the method recommended in the UNFCCC 2006 and 2019 guidelines and in the EMEP/EEA air pollutant emission inventory guidebook 2019 (note that this is a slightly simplified uncertainty propagation method).
+The uncertainty propagation method follows the method recommended in the 2006 IPCC Guidelines for National Greenhouse Gas Inventories and their 2019 Refinement ([IPCC 2006](#IPCC2006), [IPCC 2019](#IPCC2019)) and in the EMEP/EEA air pollutant emission inventory guidebook 2019 ([EMEP/EEA 2019](#EMEPEEA2019)). Note that this is a slightly simplified uncertainty propagation method.
 
-The Monte Carlo method follows as much as possible recommendations from the Bureau International des Poids et Mesures, as expressed in: Evaluation of measurement data — Supplement 1 to the “Guide to the expression of uncertainty in measurement” — Propagation of distributions using a Monte Carlo method.
-
-https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf/325dcaad-c15a-407c-1105-8b7f322d651c
+The Monte Carlo method follows as much as possible recommendations from the Bureau International des Poids et Mesures, as expressed in [JCGM 2008, S1](#JCGM2008_S1).
 
 ## Installation
 
@@ -52,8 +50,8 @@ All other functions are stored in files whose name starts with `utils_`:
 - [`utils_compute.py`](./utils_compute.py): functions to perform computation, including the Monte Carlo simulations and uncertainty propagation, using the packages `numpy` and `random`.
 - [`utils_constant.py`](./utils_constant.py): constant values and strings used for all other functions.
 - [`utils_io_file_structure.py`](./utils_io_file_structure.py): structure description of all input Excel files, to be used by the `pandas` package.
-- [`utils_io_read_check.py`](./utils_io_read_check.py): fonctions mostly using the `pandas` package to read input Excel files and also perform quality checks.
-- [`utils_io_write_to_excel.py`](./utils_io_write_to_excel.py): fonctions to write output results to Excel files, using the package `openpyxl`.
+- [`utils_io_read_check.py`](./utils_io_read_check.py): functions mostly using the `pandas` package to read input Excel files and also perform quality checks.
+- [`utils_io_write_to_excel.py`](./utils_io_write_to_excel.py): functions to write output results to Excel files, using the package `openpyxl`.
 - [`utils_plot.py`](./utils_plot.py): function to plot results, using the `matplotlib` package.
 
 
@@ -70,7 +68,7 @@ Input data are saved in a specific folder, under "/input_data/input_subxxxx", fo
 
 All input data, which normally are updated each year, are in the form of Excel files. This is not usual but based on the fact that Excel is widely used in public administrations. This format may be changed to csv files in the future.
 Each row in the input excel files corresponds to a source category. A source category is uniquely defined by the following attributes (which are saved in specific column in the Excel files):
-- nomenclature class, such as CRT for greenhouse gases according to the IPCC Guidelines, or NFR for pollutants according to the EMEP Guidebook;
+- nomenclature class, such as CRT ([Common Reporting Tables](https://unfccc.int/documents/310409)) for greenhouse gases according to the IPCC Guidelines ([IPCC 2006](#IPCC2006), [IPCC 2019](#IPCC2019)), or NFR (Nomenclature for Reporting) for pollutants according to the EMEP/EEA Guidebook ([EMEP/EEA 2019](#EMEPEEA2019));
 - source category code according to the chosen nomenclature;
 - source category name according to the chosen nomenclature (unsupported so far, please leave blank);
 - compound name;
@@ -85,7 +83,7 @@ Do not include emissions that should not be included in the inventory total. In 
 - sources of natural origin, such as NMVOC emissions from forests or greenhouse gas emissions from wild animals;
 - source categories that, according to the official guidelines, should not be included in the inventory total (such as memo items).
 
-You can check the input Excel file for emissions to see how the structure should be. The column structure cannot be modified but the number of rows can be modified as required.
+An input Excel file for emissions is provided to see how the structure should be. The column structure cannot be modified (unless [`utils_io_file_structure.py`](./utils_io_file_structure.py) is modified as well) but the number of rows can be modified as required.
 
 #### Input uncertainty data
 Input uncertainty data are saved in a specific folder, under "/input_data/input_subxxxx/input_uncertainty".
@@ -119,3 +117,18 @@ All plots automatically produced with the matplotlib package are saved as PNG fi
 
 #### Automated quality control
 Output data to be used for quality control are written in a text file.
+
+
+## References
+
+<a id="EMEPEEA2019">[EMEP/EEA 2019]</a>
+EMEP/EEA air pollutant emission inventory guidebook 2019. Technical guidance to prepare national emission inventories. European Environment Agency. [https://www.eea.europa.eu/publications/emep-eea-guidebook-2019](https://www.eea.europa.eu/publications/emep-eea-guidebook-2019)
+
+<a id="IPCC2006">[IPCC 2006]</a>
+2006 IPCC Guidelines for National Greenhouse Gas Inventories, Prepared by the National Greenhouse Gas Inventories Programme, Eggleston H.S., Buendia L., Miwa K., Ngara T. and Tanabe K. (eds). Published: IGES, Japan. Copyright by The Intergovernmental Panel on Climate Change (IPCC), 2006. [http://www.ipcc-nggip.iges.or.jp/public/2006gl/index.html](http://www.ipcc-nggip.iges.or.jp/public/2006gl/index.html)
+
+<a id="IPCC2019">[IPCC 2019]</a>
+2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories, Calvo Buendia, E., Tanabe, K., Kranjc, A., Baasansuren, J., Fukuda, M., Ngarize, S., Osako, A., Pyrozhenko, Y., Shermanau, P. and Federici, S. (eds). Published: IPCC, Switzerland. Copyright by The Intergovernmental Panel on Climate Change (IPCC), 2019. [https://www.ipcc-nggip.iges.or.jp/public/2019rf/index.html](https://www.ipcc-nggip.iges.or.jp/public/2019rf/index.html)
+
+<a id="JCGM2008_S1">[JCGM 2008, S1]</a>
+Joint Committee for Guides in Metrology, 2008: Evaluation of measurement data - Supplement 1 to the “Guide to the expression of uncertainty in measurement” - Propagation of distributions using a Monte Carlo method. [https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf)

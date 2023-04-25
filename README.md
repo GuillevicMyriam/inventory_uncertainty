@@ -91,10 +91,11 @@ For submission 2023, the input uncertainty files are saved at: [`/input_data/inp
 
 The input uncertainties must be given at the same aggregation level as for the input emissions. For each source category, the following information must be provided for activity data and emission factor or, if unknown, for emissions:
 - distribution type: normal, gamma, triangular, uniform;
-- for normal and gamma distributions: standard deviation with a coverage factor of 2;
-- for the triangular distribution: lower edge and upper edge expressed in percentage of the mean (not the values at 2.5% and 97.5% of the distribution);
+- for the normal distribution: standard deviation with a coverage factor of 1.96, therefore conrresponding to a 95% confidence interval;
+- for the gamma distribution: standard deviation with a coverage factor of 1.96;
+- for the triangular distribution: lower edge (minimum value) and upper edge (maximum value) expressed in percentage of the mean (not the values at 2.5% and 97.5% of the distribution, but the values at 0% and 100% of the distribution);
 - for the other distributions: lower end and upper end uncertainties at 2.5% and 97.5% of the distribution, expressed in percentage of the mean.
-- the information if values are correlated between the base year and the reporting year.
+- the information if values are correlated between the base year and the reporting year, or not.
 
 #### Input nomenclature data
 Input nomenclature data are saved in a specific folder, under "/input_data/input_subxxxx/input_nomenclature".
